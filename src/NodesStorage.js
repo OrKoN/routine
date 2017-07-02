@@ -1,28 +1,43 @@
 const _ = require('lodash');
 const K = 10000000;
+const INIT_SIZE = 10000;
+const SIZE_PER_ELEMENT = 28;
+const resizeBuffer = require('./resizeBuffer');
 
 class NodesStorage {
   constructor(buffer) {
-    this.buffer = buffer || Buffer.alloc(10000);
+    this.size = 0;
+    this.readonly = false;
+    if (buffer) {
+      this.readonly = true;
+      this.buffer = buffer;
+    } else {
+      this.buffer = Buffer.alloc(INIT_SIZE);
+    }
   }
 
   set(i, data) {
+    if (this.readonly) {
+      throw new Error('The buffer is readonly');
+    }
+    this.currentSize = _.max([this.currentSize, i]) + 1;
+    this.buffer = resizeBuffer(this.buffer, this.currentSize * SIZE_PER_ELEMENT);
     const id = _.padStart(data.id, 16, ' ');
-    this.buffer.write(id, i * 28 + 0);
-    this.buffer.writeInt32BE(Math.round(Number(data.location[0]) * K), i * 28 + 16);
-    this.buffer.writeInt32BE(Math.round(Number(data.location[1]) * K), i * 28 + 20);
-    this.buffer.writeInt32BE(data.firstEdgeId, i * 28 + 24);
+    this.buffer.write(id, i * SIZE_PER_ELEMENT + 0);
+    this.buffer.writeInt32BE(Math.round(Number(data.location[0]) * K), i * SIZE_PER_ELEMENT + 16);
+    this.buffer.writeInt32BE(Math.round(Number(data.location[1]) * K), i * SIZE_PER_ELEMENT + 20);
+    this.buffer.writeInt32BE(data.firstEdgeId, i * SIZE_PER_ELEMENT + 24);
   }
 
   get(i) {
     const id = this
       .buffer
-      .slice(i * 28, i * 28 + 16)
+      .slice(i * SIZE_PER_ELEMENT, i * SIZE_PER_ELEMENT + 16)
       .toString('utf-8')
       .trim();
-    const longitude = this.buffer.readInt32BE(i * 28 + 16) / K;
-    const latitude = this.buffer.readInt32BE(i * 28 + 20) / K;
-    const firstEdgeId = this.buffer.readInt32BE(i * 28 + 24);
+    const longitude = this.buffer.readInt32BE(i * SIZE_PER_ELEMENT + 16) / K;
+    const latitude = this.buffer.readInt32BE(i * SIZE_PER_ELEMENT + 20) / K;
+    const firstEdgeId = this.buffer.readInt32BE(i * SIZE_PER_ELEMENT + 24);
     return {
       id,
       location: [longitude, latitude],

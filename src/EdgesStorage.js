@@ -1,20 +1,37 @@
+const resizeBuffer = require('./resizeBuffer');
+const INIT_SIZE = 10000;
+const SIZE_PER_ELEMENT = 16;
+const _ = require('lodash');
+
 class EdgesStorage {
   constructor(buffer) {
-    this.buffer = buffer || Buffer.alloc(10000);
+    this.size = 0;
+    this.readonly = false;
+    if (buffer) {
+      this.readonly = true;
+      this.buffer = buffer;
+    } else {
+      this.buffer = Buffer.alloc(INIT_SIZE);
+    }
   }
 
   set(edgeId, { i, j, nextI, nextJ }) {
-    this.buffer.writeInt32BE(i, edgeId * 16 + 0);
-    this.buffer.writeInt32BE(j, edgeId * 16 + 4);
-    this.buffer.writeInt32BE(nextI, edgeId * 16 + 8);
-    this.buffer.writeInt32BE(nextJ, edgeId * 16 + 12);
+    if (this.readonly) {
+      throw new Error('The buffer is readonly');
+    }
+    this.currentSize = _.max([this.currentSize, i, j]) + 1;
+    this.buffer = resizeBuffer(this.buffer, this.currentSize * SIZE_PER_ELEMENT);
+    this.buffer.writeInt32BE(i, edgeId * SIZE_PER_ELEMENT + 0);
+    this.buffer.writeInt32BE(j, edgeId * SIZE_PER_ELEMENT + 4);
+    this.buffer.writeInt32BE(nextI, edgeId * SIZE_PER_ELEMENT + 8);
+    this.buffer.writeInt32BE(nextJ, edgeId * SIZE_PER_ELEMENT + 12);
   }
 
   get(edgeId) {
-    const i = this.buffer.readInt32BE(edgeId * 16  + 0);
-    const j = this.buffer.readInt32BE(edgeId * 16  + 4);
-    const nextI = this.buffer.readInt32BE(edgeId * 16  + 8);
-    const nextJ = this.buffer.readInt32BE(edgeId * 16  + 12);
+    const i = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 0);
+    const j = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 4);
+    const nextI = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 8);
+    const nextJ = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 12);
     return {
       i,
       j,
