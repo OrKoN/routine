@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const K = 10000000;
 
 class NodesStorage {
   constructor(buffer) {
@@ -8,8 +9,8 @@ class NodesStorage {
   set(i, data) {
     const id = _.padStart(data.id, 16, ' ');
     this.buffer.write(id, i * 28 + 0);
-    this.buffer.writeInt32BE(Math.round(Number(data.location[0]) * 10000000), i * 28 + 16);
-    this.buffer.writeInt32BE(Math.round(Number(data.location[1]) * 10000000), i * 28 + 20);
+    this.buffer.writeInt32BE(Math.round(Number(data.location[0]) * K), i * 28 + 16);
+    this.buffer.writeInt32BE(Math.round(Number(data.location[1]) * K), i * 28 + 20);
     this.buffer.writeInt32BE(data.firstEdgeId, i * 28 + 24);
   }
 
@@ -19,8 +20,8 @@ class NodesStorage {
       .slice(i * 28, i * 28 + 16)
       .toString('utf-8')
       .trim();
-    const longitude = this.buffer.readInt32BE(i * 28 + 16) / 10000000;
-    const latitude = this.buffer.readInt32BE(i * 28 + 20) / 10000000;
+    const longitude = this.buffer.readInt32BE(i * 28 + 16) / K;
+    const latitude = this.buffer.readInt32BE(i * 28 + 20) / K;
     const firstEdgeId = this.buffer.readInt32BE(i * 28 + 24);
     return {
       id,
