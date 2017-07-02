@@ -1,6 +1,7 @@
 const Graph = require('./Graph');
 const search = require('./search');
 const { lineString } = require('@turf/helpers');
+const knn = require('rbush-knn');
 
 let graph = null;
 
@@ -24,4 +25,16 @@ exports.directions = function (startId, endId, callback) {
   } catch (err) {
     callback(err);
   }
+}
+
+exports.geocode = function(lat, lng, cb) {
+  if (graph === null) {
+    return callback();
+  }
+  const tree = graph.getRbushTreeIndex();
+  const points = knn(tree, lat, lng, 1);
+  if (!points || !points[0]) {
+    return cb(new Error('location not found'));
+  }
+  cb(null, points[0]);
 }

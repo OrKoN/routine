@@ -26,6 +26,7 @@
   "dependencies": {
     "@turf/distance": "^4.5.2",
     "@turf/helpers": "^4.5.2",
+    "a-star": "^0.2.0",
     "cli": "^1.0.1",
     "fastpriorityqueue": "^0.3.0",
     "koa": "^2.3.0",

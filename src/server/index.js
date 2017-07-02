@@ -16,7 +16,7 @@ const workerFarm = require('worker-farm');
 const engine = workerFarm({
   maxConcurrentWorkers: 1,
   autoStart: true,
-}, require.resolve('../engine'), [ 'directions', 'init']);
+}, require.resolve('../engine'), [ 'directions', 'init', 'geocode']);
 
 app.use(mount('/ui', ui));
 
@@ -47,17 +47,26 @@ function geocode(location) {
 
 router.get('/directions', async (ctx, next) => {
   try {
-    console.log(ctx.query);
-    const originId = '83683981';
-    const destinationId = '1373588955';
-    // const originId = await geocode(ctx.query.origin);
-    // const destinationId = await geocode(ctx.query.destination); 
-    console.log(originId, destinationId);
-    const result = await getDirections(originId, destinationId);
+    const origin = await geocode(ctx.query.origin);
+    const destination = await geocode(ctx.query.destination); 
+    const result = await getDirections(origin.id, destination.id);
     ctx.body = JSON.stringify(result);
   } catch (err) {
     ctx.status = 500;
     ctx.body = err;
+  }
+});
+
+router.get('/geocode', async (ctx, next) => {
+  try {
+    const result = await geocode(ctx.query.location);
+    ctx.body = JSON.stringify(result);
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = {
+      message: err.message,
+      stack: err.stack,
+    };
   }
 });
 
@@ -67,15 +76,15 @@ app
 
 exports.start = function(input) {
   graph.load(input);
-  engine.init(input, () => {
-    console.log('cb');
-  });
   return new Promise((resolve, reject) => {
-    app.listen(3000, (err) => {
-      if (err) {
-        return reject(err);
-      }
-      resolve('Server started');
+    engine.init(input, () => {
+      console.log('graph is loaded');
+      app.listen(3000, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve('Server started');
+      });
     });
   });
 }

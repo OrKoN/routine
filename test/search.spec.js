@@ -16,7 +16,7 @@ describe('search', () => {
     // http://www.openstreetmap.org/node/83684467#map=18/48.78411/9.21148
     assert.deepEqual(search(g, '83683981', '83684467'), [
       '83683981',
-      '83684087',
+      '81785070',
       '83684467',
     ]);
     assert.deepEqual(search(g, '83683981', '1373588955'), [
