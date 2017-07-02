@@ -1,18 +1,5 @@
 #!/usr/bin/env node
 
-require("babel-register")({
-  ignore: function(filename) {
-    if (filename.indexOf('koa') !== -1 || filename.endsWith('index.js')) {
-      if (filename.endsWith('engine.js')) {
-        return true;
-      }
-      return false;
-    } else {
-      return true;
-    }
-  },
-});
-
 const cli = require('cli');
 
 const { input } = cli.parse({

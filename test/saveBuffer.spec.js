@@ -8,8 +8,12 @@ describe('saveBuffer', () => {
   });
 
   it('should save a buffer', () => {
-    const buf = Buffer.alloc(1);
+    const buf = Buffer.alloc(10);
     buf.writeUInt8(118, 0);
-    saveBuffer('./test.buffer', buf);
+    buf.writeUInt8(119, 1);
+    saveBuffer('./test.buffer', buf, 1);
+    const readBuffer = fs.readFileSync('./test.buffer');
+    assert.equal(readBuffer.length, 1);
+    assert.equal(readBuffer.readUInt8(0), 118);
   });
 });

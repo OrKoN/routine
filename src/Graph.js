@@ -2,6 +2,7 @@ const NodesStorage = require('./NodesStorage');
 const EdgesStorage = require('./EdgesStorage');
 const fs = require('fs');
 const path = require('path');
+const rbush = require('rbush');
 
 /**
  x, y - external ids
@@ -11,6 +12,7 @@ class Graph {
   constructor() {
     this.nodeIndex = {};
     this.edgeIndex = {};
+    this.rbushTree = rbush(9, ['.latitude', '.longitude', '.latitude', '.longitude']); 
     this.nextNodeId = 0;
     this.nextEdgeId = 0;
     this.nodes = new NodesStorage();
@@ -42,6 +44,11 @@ class Graph {
   setVertexValue(x, v) {
     const i = this.getVertexNumber(x);
     this.nodes.set(i, v);
+    this.rbushTree.insert({
+      id: v.id,
+      latitude: v.location[1],
+      longitude: v.location[0],
+    });
   }
 
   getEdgeNumber(x, y) {
@@ -190,13 +197,9 @@ class Graph {
   save(destDir) {
     try {
       fs.mkdirSync(destDir);
-    } catch (err) {
-
-    }
+    } catch (err) {}
 
     try {
-      fs.writeFileSync(path.join(destDir, 'nodeIndex.json'), JSON.stringify(this.nodeIndex), 'utf-8');
-      fs.writeFileSync(path.join(destDir, 'edgeIndex.json'), JSON.stringify(this.edgeIndex), 'utf-8');
       this.nodes.save(path.join(destDir, 'nodes.bin'));
       this.edges.save(path.join(destDir, 'edges.bin'));
     } catch (err) {
@@ -207,14 +210,42 @@ class Graph {
 
   load(srcDir) {
     try {
-      this.nodeIndex = JSON.parse(fs.readFileSync(path.join(srcDir, 'nodeIndex.json'), 'utf-8'));
-      this.edgeIndex = JSON.parse(fs.readFileSync(path.join(srcDir, 'edgeIndex.json'), 'utf-8'));
       this.nodes.load(path.join(srcDir, 'nodes.bin'));
       this.edges.load(path.join(srcDir, 'edges.bin'));
+      this.reindex();
     } catch (err) {
       console.log(err);
       throw err;
     }
+  }
+
+  reindex() {
+    this.buildNodeIndex();
+    this.buildEdgeIndex();
+  }
+
+  buildNodeIndex() {
+    this.nodeIndex = {};
+    this.rbushTree.clear();
+    
+    const length = this.nodes.getCurrentSize();
+    for (let i = 0; i < length; i++) {
+      const node = this.nodes.get(i);
+      this.nodeIndex[node.id] = i;
+      this.rbushTree.insert({
+        id: node.id,
+        latitude: node.location[1],
+        longitude: node.location[0],
+      });
+    }
+  }
+
+  buildEdgeIndex() {
+    this.edgeIndex = {};
+  }
+
+  getRbushTreeIndex() {
+    return this.rbushTree;
   }
 }
 

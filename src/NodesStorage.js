@@ -48,12 +48,17 @@ class NodesStorage {
   }
 
   save(destFile) {
-    saveBuffer(destFile, this.buffer);
+    saveBuffer(destFile, this.buffer, this.currentSize * SIZE_PER_ELEMENT);
   }
 
   load(srcFile) {
     this.buffer = loadBufferReadonly(srcFile);
     this.readonly = true;
+    this.currentSize = this.buffer.length / SIZE_PER_ELEMENT;
+  }
+
+  getCurrentSize() {
+    return this.currentSize;
   }
 }
 

@@ -21,11 +21,6 @@
   },
   "homepage": "https://github.com/OrKoN/routine#readme",
   "devDependencies": {
-    "babel-plugin-transform-async-to-generator": "^6.24.1",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-es2017": "^6.24.1",
-    "babel-preset-stage-3": "^6.24.1",
-    "babel-register": "^6.24.1",
     "mocha": "^3.4.2"
   },
   "dependencies": {
@@ -40,7 +35,6 @@
     "lodash": "^4.17.4",
     "mmap.js": "^1.0.3",
     "worker-farm": "^1.4.1",
-    "xml-stream": "^0.4.5",
-    "xml2js": "^0.4.17"
+    "xml-stream": "^0.4.5"
   }
 }
