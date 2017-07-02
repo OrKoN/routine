@@ -84,7 +84,7 @@ const getNodesIndex = (g, xml, roadNodes, isFirstOrLast) => {
       if (roadNodes[osmId] > 1 || (roadNodes[osmId] === 0 && deadEnd)) {
         const node = {
           id: osmId,
-          location: [Number(item.$.lat), Number(item.$.lon)],
+          location: [Number(item.$.lon), Number(item.$.lat)],
           firstEdgeId: -1,
         };
         g.addVertex(node.id);
@@ -98,7 +98,7 @@ const getNodesIndex = (g, xml, roadNodes, isFirstOrLast) => {
   });
 }
 
-function saveGraph(g, xml, nodesIndex) {
+function saveGraph(g, xml, nodesIndex, dir) {
   return new Promise((resolve, reject) => {
     let edges = 0;
     xml.collect('tag');
@@ -148,20 +148,20 @@ function saveGraph(g, xml, nodesIndex) {
       }
     });
     xml.on('end', () => {
-      g.save('./test-graph');
+      g.save(dir);
       resolve();
     });
   });
 }
 
-exports.createGraph = function(filename) {
+exports.createGraph = function(filename, dir) {
   const g = new Graph();
   return getRoadNodes(getXmlStream(filename))
     .then(({ nodes, isFirstOrLast }) => {
       return getNodesIndex(g, getXmlStream(filename), nodes, isFirstOrLast);
     })
     .then((nodesIndex) => {
-      return saveGraph(g, getXmlStream(filename), nodesIndex);
+      return saveGraph(g, getXmlStream(filename), nodesIndex, dir);
     })
     .then(() => g)
     .catch(error => console.error(error));
