@@ -24,7 +24,10 @@
     "mocha": "^3.4.2"
   },
   "dependencies": {
+    "@turf/distance": "^4.5.2",
     "lodash": "^4.17.4",
-    "mmap.js": "^1.0.3"
+    "mmap.js": "^1.0.3",
+    "xml-stream": "^0.4.5",
+    "xml2js": "^0.4.17"
   }
 }

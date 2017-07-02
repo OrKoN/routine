@@ -3,6 +3,8 @@ const K = 10000000;
 const INIT_SIZE = 10000;
 const SIZE_PER_ELEMENT = 28;
 const resizeBuffer = require('./resizeBuffer');
+const saveBuffer = require('./saveBuffer');
+const loadBufferReadonly = require('./loadBufferReadonly');
 
 class NodesStorage {
   constructor(buffer) {
@@ -43,6 +45,15 @@ class NodesStorage {
       location: [longitude, latitude],
       firstEdgeId: firstEdgeId,
     };
+  }
+
+  save(destFile) {
+    saveBuffer(destFile, this.buffer);
+  }
+
+  load(srcFile) {
+    this.buffer = loadBufferReadonly(srcFile);
+    this.readonly = true;
   }
 }
 

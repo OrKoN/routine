@@ -2,6 +2,8 @@ const resizeBuffer = require('./resizeBuffer');
 const INIT_SIZE = 10000;
 const SIZE_PER_ELEMENT = 16;
 const _ = require('lodash');
+const saveBuffer = require('./saveBuffer');
+const loadBufferReadonly = require('./loadBufferReadonly');
 
 class EdgesStorage {
   constructor(buffer) {
@@ -38,6 +40,15 @@ class EdgesStorage {
       nextI,
       nextJ,
     };
+  }
+
+  save(destFile) {
+    saveBuffer(destFile, this.buffer);
+  }
+
+  load(srcFile) {
+    this.buffer = loadBufferReadonly(srcFile);
+    this.readonly = true;
   }
 }
 

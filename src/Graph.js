@@ -1,5 +1,7 @@
 const NodesStorage = require('./NodesStorage');
 const EdgesStorage = require('./EdgesStorage');
+const fs = require('fs');
+const path = require('path');
 
 /**
  x, y - external ids
@@ -8,7 +10,7 @@ const EdgesStorage = require('./EdgesStorage');
 class Graph {
   constructor() {
     this.nodeIndex = {};
-    this.edgesIndex = {};
+    this.edgeIndex = {};
     this.nextNodeId = 0;
     this.nextEdgeId = 0;
     this.nodes = new NodesStorage();
@@ -44,32 +46,32 @@ class Graph {
 
   getEdgeNumber(x, y) {
     const key = `${x}_${y}`;
-    if (key in this.edgesIndex) {
-      return this.edgesIndex[key];
+    if (key in this.edgeIndex) {
+      return this.edgeIndex[key];
     }
     throw new Error(`Edge ${x}, ${y} does not exist`);
   }
 
   addEdge(x, y) {
     const key = `${x}_${y}`;
-    if (key in this.edgesIndex) {
-      return this.edgesIndex[key];
+    if (key in this.edgeIndex) {
+      return this.edgeIndex[key];
     }
     const i = this.getVertexNumber(x);
     const j = this.getVertexNumber(y);
     const xValue = this.getVertexValue(x);
     const yValue = this.getVertexValue(y);
     const edgeId = this.nextEdgeId;
-    this.edgesIndex[key] = edgeId;
-    if (i < j) {
+    this.edgeIndex[key] = edgeId;
+    // if (i < j) {
       this.edges.set(edgeId, {
         i, j, nextI: -1, nextJ: -1
       });
-    } else {
-      this.edges.set(edgeId, {
-        i: j, j: i, nextI: -1, nextJ: -1,
-      });
-    }
+    // } else {
+    //   this.edges.set(edgeId, {
+    //     i: j, j: i, nextI: -1, nextJ: -1,
+    //   });
+    // }
 
     if (xValue.firstEdgeId === -1) {
       xValue.firstEdgeId = edgeId;
@@ -149,11 +151,13 @@ class Graph {
         if (targetEdge.j === j) {
           return true;
         }
-      } else if (targetEdge.j === i) {
+      } 
+      else if (targetEdge.j === i) {
         targetEdgeId = targetEdge.nextJ;
-        if (targetEdge.i == j) {
-          return true;
-        }
+        // TODO
+        // if (targetEdge.i == j) {
+        //   return true;
+        // }
       } else {
         throw new Error('wrong structure');
       }
@@ -173,7 +177,7 @@ class Graph {
         neighbors.push(targetEdge.j);
       } else if (targetEdge.j === i) {
         targetEdgeId = targetEdge.nextJ;
-        neighbors.push(targetEdge.i);
+        // neighbors.push(targetEdge.i);
       } else {
         throw new Error('wrong structure');
       }
@@ -181,6 +185,36 @@ class Graph {
     return neighbors.map(internalId => {
       return this.nodes.get(internalId).id;
     });
+  }
+
+  save(destDir) {
+    try {
+      fs.mkdirSync(destDir);
+    } catch (err) {
+
+    }
+
+    try {
+      fs.writeFileSync(path.join(destDir, 'nodeIndex.json'), JSON.stringify(this.nodeIndex), 'utf-8');
+      fs.writeFileSync(path.join(destDir, 'edgeIndex.json'), JSON.stringify(this.edgeIndex), 'utf-8');
+      this.nodes.save(path.join(destDir, 'nodes.bin'));
+      this.edges.save(path.join(destDir, 'edges.bin'));
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  load(srcDir) {
+    try {
+      this.nodeIndex = JSON.parse(fs.readFileSync(path.join(srcDir, 'nodeIndex.json'), 'utf-8'));
+      this.edgeIndex = JSON.parse(fs.readFileSync(path.join(srcDir, 'edgeIndex.json'), 'utf-8'));
+      this.nodes.load(path.join(srcDir, 'nodes.bin'));
+      this.edges.load(path.join(srcDir, 'edges.bin'));
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 }
 

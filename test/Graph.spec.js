@@ -63,11 +63,21 @@ describe('Graph', () => {
       );
     }
 
-    assert.equal(g.adjacent('node0', 'node3'), true);
-    assert.equal(g.adjacent('node0', 'node1'), false);
-    assert.equal(g.adjacent('node1', 'node2'), true);
-    assert.equal(g.adjacent('node3', 'node6'), false);
+    const testConnectivity = () => {
+      assert.equal(g.adjacent('node0', 'node3'), true);
+      assert.equal(g.adjacent('node0', 'node1'), false);
+      assert.equal(g.adjacent('node1', 'node2'), true);
+      assert.equal(g.adjacent('node3', 'node6'), false);
 
-    assert.deepEqual(g.neighbors('node0'), ['node3', 'node7']);
+      assert.deepEqual(g.neighbors('node0'), ['node3', 'node7']);
+    }
+
+    testConnectivity();
+
+    g.save('./test-graph');
+    g.load('./test-graph');
+
+    testConnectivity();
+
   });
 });
