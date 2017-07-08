@@ -1,9 +1,9 @@
 const assert = require('assert');
-const { createGraph } = require('../src/osm');
+const createGraph = require('../src/osm-pbf');
 
-describe('osm', () => {
+describe('osm-pbf', () => {
   it('should create a graph', () => {
-    return createGraph('./test/files/map.osm', './test-graph')
+    return createGraph('./test/files/map.osm.pbf', './test-graph')
       .then(g => {
         // http://www.openstreetmap.org/node/83684087#map=18/48.78411/9.21148
         assert.deepEqual(g.neighbors('83684087'), ['83683981', '281889346', '83684467']);

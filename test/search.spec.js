@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { createGraph } = require('../src/osm');
+const createGraph = require('../src/osm-pbf');
 const search = require('../src/search');
 const knn = require('rbush-knn');
 
@@ -7,7 +7,7 @@ describe('search', () => {
   let g = null;
 
   before(async () => {
-    g = await createGraph('./test/files/map.osm', './test-graph');
+    g = await createGraph('./test/files/map.osm.pbf', './test-graph');
   });
 
   it('should find path on the graph', async () => {
@@ -19,14 +19,12 @@ describe('search', () => {
       '81785070',
       '83684467',
     ]);
-    assert.deepEqual(search(g, '83683981', '1373588955'), [
+    assert.deepEqual(search(g, '83683981', '82658025'), [
       '83683981',
       '81785070',
       '2853280950',
-      '316961604',
       '316961593',
       '82658025',
-      '1373588955',
     ]);
   });
 

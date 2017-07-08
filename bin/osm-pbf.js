@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const cli = require('cli');
+const createGraph = require('../src/osm-pbf');
 
 const { input, output } = cli.parse({
   input: [ 'i', 'an OSM XML file to process', 'file', false ],
@@ -15,9 +16,11 @@ if (!output) {
   cli.fatal('Output directory is required');
 }
 
-const { createGraph } = require('../src/osm');
 
 createGraph(input, output)
   .then(() => {
     cli.ok('Graph is created');
+  })
+  .catch(err => {
+    cli.error('Error', err);
   });

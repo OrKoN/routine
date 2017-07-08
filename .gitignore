@@ -58,3 +58,4 @@ typings/
 .env
 
 test-graph*
+berlin-latest.osm*

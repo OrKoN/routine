@@ -1,5 +1,5 @@
 const resizeBuffer = require('./resizeBuffer');
-const INIT_SIZE = 10000;
+const INIT_SIZE = 100000000;
 const SIZE_PER_ELEMENT = 16;
 const _ = require('lodash');
 const saveBuffer = require('./saveBuffer');
@@ -52,8 +52,12 @@ class EdgesStorage {
     this.currentSize = this.buffer.length / SIZE_PER_ELEMENT;
   }
 
-  getCurrentSize() {
+  getNumberOfElements() {
     return this.currentSize;
+  }
+
+  getSize() {
+    return this.getNumberOfElements() * SIZE_PER_ELEMENT;
   }
 }
 

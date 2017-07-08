@@ -3,6 +3,7 @@ const EdgesStorage = require('./EdgesStorage');
 const fs = require('fs');
 const path = require('path');
 const rbush = require('rbush');
+const cli = require('cli');
 
 /**
  x, y - external ids
@@ -89,6 +90,7 @@ class Graph {
       let lastEdgeId = targetEdgeId;
       let targetEdge = this.edges.get(targetEdgeId);
       let attr = '';
+      let count = 0;
       while (targetEdgeId !== -1) {
         targetEdge = this.edges.get(targetEdgeId);
         lastEdgeId = targetEdgeId;
@@ -100,6 +102,10 @@ class Graph {
           attr = 'nextJ';
         } else {
           throw new Error('wrong structure');
+        }
+        count++;
+        if (count > 100) {
+          throw new Error(`Infinite loop ${x} ${y}: ${targetEdgeId}, ${targetEdge.nextI}, ${targetEdge.nextJ}`);
         }
       }
       targetEdge[attr] = edgeId;
@@ -114,6 +120,7 @@ class Graph {
       let lastEdgeId = targetEdgeId;
       let targetEdge = this.edges.get(targetEdgeId);
       let attr = '';
+      let count = 0;
       while (targetEdgeId !== -1) {
         targetEdge = this.edges.get(targetEdgeId);
         lastEdgeId = targetEdgeId;
@@ -125,6 +132,10 @@ class Graph {
           attr = 'nextJ';
         } else {
           throw new Error('wrong structure');
+        }
+        count++;
+        if (count > 100) {
+          throw new Error(`Infinite loop ${x} ${y}: ${targetEdgeId}, ${targetEdge.nextI}, ${targetEdge.nextJ}`);
         }
       }
       targetEdge[attr] = edgeId;
@@ -203,24 +214,30 @@ class Graph {
       this.nodes.save(path.join(destDir, 'nodes.bin'));
       this.edges.save(path.join(destDir, 'edges.bin'));
     } catch (err) {
-      console.log(err);
+      cli.error(err);
       throw err;
     }
   }
 
   load(srcDir) {
     try {
+      cli.info('Started loading nodes');
       this.nodes.load(path.join(srcDir, 'nodes.bin'));
+      cli.ok('Nodes loaded');
+      cli.info('Started loading edged');
       this.edges.load(path.join(srcDir, 'edges.bin'));
+      cli.ok('Edges loaded');
       this.reindex();
     } catch (err) {
-      console.log(err);
+      cli.error(err);
       throw err;
     }
   }
 
   reindex() {
+    cli.info('Started building node index');
     this.buildNodeIndex();
+    cli.info('Node index built');
     this.buildEdgeIndex();
   }
 
@@ -228,7 +245,7 @@ class Graph {
     this.nodeIndex = {};
     this.rbushTree.clear();
     
-    const length = this.nodes.getCurrentSize();
+    const length = this.nodes.getNumberOfElements();
     for (let i = 0; i < length; i++) {
       const node = this.nodes.get(i);
       this.nodeIndex[node.id] = i;
@@ -246,6 +263,10 @@ class Graph {
 
   getRbushTreeIndex() {
     return this.rbushTree;
+  }
+
+  getSize() {
+    return this.edges.getSize() + this.nodes.getSize();
   }
 }
 
