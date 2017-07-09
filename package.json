@@ -38,6 +38,6 @@
     "pretty-bytes": "^4.0.2",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.0.0",
-    "worker-farm": "^1.4.1"
+    "uuid": "^3.1.0"
   }
 }

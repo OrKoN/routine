@@ -9,15 +9,7 @@ ui.use(serve(__dirname + '/ui'));
 const app = new Koa();
 const router = new Router();
 const cli = require('cli');
-
-const Graph = require('../Graph');
-const graph = new Graph();
-
-const workerFarm = require('worker-farm');
-const engine = workerFarm({
-  maxConcurrentWorkers: 1,
-  autoStart: true,
-}, require.resolve('../engine'), [ 'directions', 'init', 'geocode']);
+const engine = require('../engine');
 
 app.use(mount('/ui', ui));
 
@@ -78,17 +70,15 @@ app
   .use(router.routes())
   .use(router.allowedMethods());
 
-exports.start = function(input) {
-  graph.load(input);
+exports.start = async function(input) {
+  await engine.start(input);
+  cli.ok('graph is loaded');
   return new Promise((resolve, reject) => {
-    engine.init(input, () => {
-      cli.ok('graph is loaded');
-      app.listen(3000, (err) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve('Server started');
-      });
+    app.listen(3000, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve('Server started');
     });
   });
 }
