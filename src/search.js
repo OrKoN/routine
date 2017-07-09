@@ -1,7 +1,8 @@
 const aStar = require('a-star');
-const distance = require('@turf/distance');
+const distance = require('./distance');
 
 const search = (graph, startId, endId) => {
+  console.time('search');
   var path = aStar({
     start: startId,
     isEnd: function(node) {
@@ -11,34 +12,17 @@ const search = (graph, startId, endId) => {
       return graph.neighbors(node);
     },
     distance: function(a, b) {
-      return 1;
+      return graph.getEdgeValue(a, b).distance;
     },
     heuristic: function(node) {
-      const from = {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'Point',
-          coordinates: graph.getVertexValue(node).location,
-        }
-      };
-      const to = {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'Point',
-          coordinates: graph.getVertexValue(endId).location,
-        }
-      };
-
-      const units = 'meters';
-      const cost = distance(from, to, units);
+      const cost = distance(graph.getVertexValue(node), graph.getVertexValue(endId));
       return cost;
     }
   });
   if (path.status !== 'success') {
     throw new Error('No Path');
   }
+  console.timeEnd('search');
   return path.path;
 };
 

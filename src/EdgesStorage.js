@@ -1,6 +1,6 @@
 const resizeBuffer = require('./resizeBuffer');
 const INIT_SIZE = 100000000;
-const SIZE_PER_ELEMENT = 16;
+const SIZE_PER_ELEMENT = 20;
 const _ = require('lodash');
 const saveBuffer = require('./saveBuffer');
 const loadBufferReadonly = require('./loadBufferReadonly');
@@ -17,7 +17,7 @@ class EdgesStorage {
     }
   }
 
-  set(edgeId, { i, j, nextI, nextJ }) {
+  set(edgeId, { i, j, nextI, nextJ, distance }) {
     if (this.readonly) {
       throw new Error('The buffer is readonly');
     }
@@ -27,6 +27,7 @@ class EdgesStorage {
     this.buffer.writeInt32BE(j, edgeId * SIZE_PER_ELEMENT + 4);
     this.buffer.writeInt32BE(nextI, edgeId * SIZE_PER_ELEMENT + 8);
     this.buffer.writeInt32BE(nextJ, edgeId * SIZE_PER_ELEMENT + 12);
+    this.buffer.writeInt32BE(distance, edgeId * SIZE_PER_ELEMENT + 16);
   }
 
   get(edgeId) {
@@ -34,11 +35,13 @@ class EdgesStorage {
     const j = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 4);
     const nextI = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 8);
     const nextJ = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 12);
+    const distance = this.buffer.readInt32BE(edgeId * SIZE_PER_ELEMENT  + 16);
     return {
       i,
       j,
       nextI,
       nextJ,
+      distance,
     };
   }
 

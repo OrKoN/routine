@@ -2,30 +2,9 @@ const through = require('through2');
 const parseOSM = require('osm-pbf-parser');
 const fs = require('fs');
 const Graph = require('../Graph');
-const distance = require('@turf/distance');
 const prettyBytes = require('pretty-bytes');
 const cli = require('cli');
-
-function getDistance(a, b) {
-  const from = {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'Point',
-      coordinates: a.location,
-    }
-  };
-  const to = {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'Point',
-      coordinates: b.location,
-    }
-  };
-  const units = 'meters';
-  return distance(from, to, units);
-}
+const distance = require('../distance');
 
 const highways = [
   'motorway',
@@ -33,7 +12,15 @@ const highways = [
   'primary',
   'secondary',
   'tertiary',
-  'residential'
+  'residential',
+  'primary_link',
+  'secondary_link',
+  'trunk_link',
+  'tertiary_link',
+  'motorway_link',
+  'unclassified',
+  'road',
+  'living_street',
 ]
 
 function isRoadWay(item) {
@@ -58,9 +45,6 @@ function collectNodesInWays(input) {
         items.forEach(function (item) {
           if (isRoadWay(item)) {
             for (const [index, ref] of item.refs.entries()) {
-              if (ref === '1373588955') {
-                console.log(item);
-              }
               if (!(ref in nodesInWays)) {
                 nodesInWays[ref] = {
                   isLast: false,
@@ -131,13 +115,12 @@ function buildGraph(input, output, nodesInWays) {
                 towerA = towerB;
                 towerB = ref;
                 if (towerA && towerB && towerA !== towerB) {
-                  // const startNode = g.getVertexValue(startNodeId);
-                  // const endNode = g.getVertexValue(endNodeId);
+                  const d = distance(g.getVertexValue(towerA), g.getVertexValue(towerB));
                   if (towerA !== towerB) {
-                    g.addEdge(towerA, towerB);
+                    g.addEdge(towerA, towerB, d);
                     stats['edges']++;
                     if (item.tags.oneway !== 'yes') {
-                      g.addEdge(towerB, towerA);
+                      g.addEdge(towerB, towerA, d);
                       stats['edges']++;
                     }
                   }

@@ -60,7 +60,7 @@ class Graph {
     throw new Error(`Edge ${x}, ${y} does not exist`);
   }
 
-  addEdge(x, y) {
+  addEdge(x, y, distance) {
     const key = `${x}_${y}`;
     if (key in this.edgeIndex) {
       return this.edgeIndex[key];
@@ -72,9 +72,9 @@ class Graph {
     const edgeId = this.nextEdgeId;
     this.edgeIndex[key] = edgeId;
     // if (i < j) {
-      this.edges.set(edgeId, {
-        i, j, nextI: -1, nextJ: -1
-      });
+    this.edges.set(edgeId, {
+      i, j, nextI: -1, nextJ: -1, distance,
+    });
     // } else {
     //   this.edges.set(edgeId, {
     //     i: j, j: i, nextI: -1, nextJ: -1,
@@ -238,7 +238,9 @@ class Graph {
     cli.info('Started building node index');
     this.buildNodeIndex();
     cli.info('Node index built');
+    cli.info('Started building edges index');
     this.buildEdgeIndex();
+    cli.ok('Edges index built');
   }
 
   buildNodeIndex() {
@@ -259,6 +261,14 @@ class Graph {
 
   buildEdgeIndex() {
     this.edgeIndex = {};
+    const length = this.edges.getNumberOfElements();
+    for (let k = 0; k < length; k++) {
+      const { i, j } = this.edges.get(k);
+      const x = this.nodes.get(i);
+      const y = this.nodes.get(j);
+      const key = `${x.id}_${y.id}`;
+      this.edgeIndex[key] = i;
+    }
   }
 
   getRbushTreeIndex() {

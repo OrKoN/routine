@@ -8,6 +8,7 @@ ui.use(serve(__dirname + '/ui'));
 
 const app = new Koa();
 const router = new Router();
+const cli = require('cli');
 
 const Graph = require('../Graph');
 const graph = new Graph();
@@ -53,7 +54,10 @@ router.get('/directions', async (ctx, next) => {
     ctx.body = JSON.stringify(result);
   } catch (err) {
     ctx.status = 500;
-    ctx.body = err;
+    ctx.body = {
+      message: err.message,
+      stack: err.stack,
+    };
   }
 });
 
@@ -78,7 +82,7 @@ exports.start = function(input) {
   graph.load(input);
   return new Promise((resolve, reject) => {
     engine.init(input, () => {
-      console.log('graph is loaded');
+      cli.ok('graph is loaded');
       app.listen(3000, (err) => {
         if (err) {
           return reject(err);
